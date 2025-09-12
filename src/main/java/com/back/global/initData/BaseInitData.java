@@ -1,5 +1,6 @@
 package com.back.global.initData;
 
+import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import com.back.domain.post.postComment.service.PostCommentService;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BaseInitData {
     private final PostService postService;
     private final PostCommentService postCommentService;
+    private final MemberService memberService;
 
     @Autowired
     @Lazy
@@ -30,6 +32,17 @@ public class BaseInitData {
 
     @Transactional
     public void work1() {
+        if (memberService.count() > 0) return;
+
+        memberService.join("user1", "1234", "유저1");
+        memberService.join("user2", "1234", "유저2");
+        memberService.join("user3", "1234", "유저3");
+        memberService.join("user4", "1234", "유저4");
+        memberService.join("user5", "1234", "유저5");
+    }
+
+    @Transactional
+    public void work2() {
         if (postService.count() > 0) return;
 
         Post post1 = postService.create("제목 1", "내용 1");
