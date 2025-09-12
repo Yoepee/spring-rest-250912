@@ -1,9 +1,11 @@
 package com.back.domain.post.post.entity;
 
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.post.postComment.entity.PostComment;
 import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,8 @@ import static jakarta.persistence.CascadeType.REMOVE;
 @NoArgsConstructor
 @Getter
 public class Post extends BaseEntity {
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member author;
     private String title;
     private String content;
 
@@ -27,7 +31,8 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy="post", fetch = FetchType.LAZY, cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     private List<PostComment> postComments = new ArrayList<>();
 
-    public Post(String title, String content) {
+    public Post(Member author, String title, String content) {
+        this.author = author;
         this.title = title;
         this.content = content;
     }
@@ -37,8 +42,8 @@ public class Post extends BaseEntity {
         this.content = content;
     }
 
-    public PostComment addPostComment(String content) {
-        PostComment postComment = new PostComment(this, content);
+    public PostComment addPostComment(Member author, String content) {
+        PostComment postComment = new PostComment(author, this, content);
         postComments.add(postComment);
 
         return postComment;

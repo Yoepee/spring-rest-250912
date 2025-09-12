@@ -1,5 +1,6 @@
 package com.back.domain.post.post.service;
 
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.repostiory.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +30,8 @@ public class PostService {
         return postRepository.findByTitle(title).get();
     }
 
-    public Post create(String title, String content) {
-        Post post = new Post(title, content);
+    public Post create(Member author, String title, String content) {
+        Post post = new Post(author, title, content);
 
         return postRepository.save(post);
     }

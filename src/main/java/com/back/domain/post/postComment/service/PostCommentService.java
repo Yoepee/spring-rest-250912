@@ -1,5 +1,6 @@
 package com.back.domain.post.postComment.service;
 
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.postComment.entity.PostComment;
 import com.back.domain.post.postComment.repository.PostCommentRepository;
@@ -15,8 +16,8 @@ public class PostCommentService {
         return postCommentRepository.countPostCommentsByPost(post);
     }
 
-    public PostComment create(Post post, String content) {
-        PostComment postComment = post.addPostComment(content);
+    public PostComment create(Member author, Post post, String content) {
+        PostComment postComment = post.addPostComment(author, content);
         return postCommentRepository.save(postComment);
     }
 

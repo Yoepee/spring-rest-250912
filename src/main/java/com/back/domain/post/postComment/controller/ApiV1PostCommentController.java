@@ -1,5 +1,7 @@
 package com.back.domain.post.postComment.controller;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import com.back.domain.post.postComment.dto.*;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class ApiV1PostCommentController {
     private final PostService postService;
     private final PostCommentService postCommentService;
+    private final MemberService memberService;
 
     @GetMapping("")
     @Transactional(readOnly = true)
@@ -49,8 +52,9 @@ public class ApiV1PostCommentController {
     @PostMapping("")
     @Transactional
     public RsData<PostCommentWriteResBody> write(@PathVariable Long postId, @Valid @RequestBody PostCommentWriteReqBody reqBody) {
+        Member member = memberService.findByUsername("user1");
         Post post = postService.findById(postId);
-        PostComment postComment = postCommentService.create(post, reqBody.content());
+        PostComment postComment = postCommentService.create(member, post, reqBody.content());
         return new RsData<>("201-1", "%d번 댓글이 생성되었습니다.".formatted(postComment.getId()), new PostCommentWriteResBody(postCommentService.countPostCommentsByPost(post), new PostCommentDto(postComment)));
     }
 
