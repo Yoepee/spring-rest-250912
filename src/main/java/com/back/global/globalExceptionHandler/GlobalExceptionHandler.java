@@ -2,6 +2,7 @@ package com.back.global.globalExceptionHandler;
 
 import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -53,10 +54,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<RsData<Void>> handle(ServiceException e) {
-        return new ResponseEntity<>(
-                e.getRsData(),
-                BAD_REQUEST
-        );
+    public RsData<Void> handle(ServiceException e, HttpServletResponse response) {
+        RsData<Void>  rsData = e.getRsData();
+
+        response.setStatus(rsData.statusCode());
+
+        return rsData;
     }
 }
