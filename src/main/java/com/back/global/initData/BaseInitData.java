@@ -47,9 +47,9 @@ public class BaseInitData {
     public void work2() {
         if (postService.count() > 0) return;
 
-        Member member1 = memberService.findByUsername("user1");
-        Member member2 = memberService.findByUsername("user2");
-        Member member3 = memberService.findByUsername("user3");
+        Member member1 = memberService.findByUsername("user1").get();
+        Member member2 = memberService.findByUsername("user2").get();
+        Member member3 = memberService.findByUsername("user3").get();
 
         Post post1 = postService.create(member1,"제목 1", "내용 1");
         Post post2 =postService.create(member1, "제목 2", "내용 2");

@@ -5,6 +5,8 @@ import com.back.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -20,7 +22,7 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public Member findByUsername(String user1) {
-        return memberRepository.findByUsername(user1).orElseThrow(() -> new RuntimeException("멤버가 존재하지 않습니다."));
+    public Optional<Member> findByUsername(String user1) {
+        return memberRepository.findByUsername(user1);
     }
 }

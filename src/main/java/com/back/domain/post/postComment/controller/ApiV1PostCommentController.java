@@ -52,7 +52,7 @@ public class ApiV1PostCommentController {
     @PostMapping("")
     @Transactional
     public RsData<PostCommentWriteResBody> write(@PathVariable Long postId, @Valid @RequestBody PostCommentWriteReqBody reqBody) {
-        Member member = memberService.findByUsername("user1");
+        Member member = memberService.findByUsername("user1").get();
         Post post = postService.findById(postId);
         PostComment postComment = postCommentService.create(member, post, reqBody.content());
         return new RsData<>("201-1", "%d번 댓글이 생성되었습니다.".formatted(postComment.getId()), new PostCommentWriteResBody(postCommentService.countPostCommentsByPost(post), new PostCommentDto(postComment)));
