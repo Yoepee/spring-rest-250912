@@ -54,7 +54,7 @@ public class ApiV1MemberControllerTest {
                 .andExpect(handler().methodName("join"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
-                .andExpect(jsonPath("$.msg").value("%s님 환영합니다. 회원가입이 완료되었습니다.".formatted(member.getNickname())))
+                .andExpect(jsonPath("$.message").value("%s님 환영합니다. 회원가입이 완료되었습니다.".formatted(member.getNickname())))
                 .andExpect(jsonPath("$.data.id").value(member.getId()))
                 .andExpect(jsonPath("$.data.createdDate").value(Matchers.startsWith(member.getCreatedDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.modifiedDate").value(Matchers.startsWith(member.getModifiedDate().toString().substring(0, 20))))
