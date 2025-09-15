@@ -56,6 +56,7 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.data.id").value(post.getId()))
                 .andExpect(jsonPath("$.data.createdDate").value(Matchers.startsWith(post.getCreatedDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.modifiedDate").value(Matchers.startsWith(post.getModifiedDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.authorName").value(post.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.data.title").value(post.getTitle()))
                 .andExpect(jsonPath("$.data.content").value(post.getContent()));
     }
@@ -84,6 +85,7 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.message").value("%d번 게시글이 수정되었습니다.".formatted(post.getId())))
                 .andExpect(jsonPath("$.data.post.id").value(post.getId()))
+                .andExpect(jsonPath("$.data.post.authorName").value(post.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.data.post.title").value("제목 update"))
                 .andExpect(jsonPath("$.data.post.content").value("내용 update"));
     }
@@ -123,6 +125,7 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.id").value(post.getId()))
                 .andExpect(jsonPath("$.createdDate").value(Matchers.startsWith(post.getCreatedDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.modifiedDate").value(Matchers.startsWith(post.getModifiedDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.authorName").value(post.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.title").value(post.getTitle()))
                 .andExpect(jsonPath("$.content").value(post.getContent()));
     }
@@ -149,6 +152,7 @@ public class ApiV1PostControllerTest {
                     .andExpect(jsonPath("$[%d].id".formatted(i)).value(post.getId()))
                     .andExpect(jsonPath("$[%d].createdDate".formatted(i)).value(Matchers.startsWith(post.getCreatedDate().toString().substring(0, 20))))
                     .andExpect(jsonPath("$[%d].modifiedDate".formatted(i)).value(Matchers.startsWith(post.getModifiedDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].authorName".formatted(i)).value(post.getAuthor().getNickname()))
                     .andExpect(jsonPath("$[%d].title".formatted(i)).value(post.getTitle()))
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(post.getContent()));
         }
