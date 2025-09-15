@@ -60,4 +60,37 @@ public class ApiV1MemberControllerTest {
                 .andExpect(jsonPath("$.data.modifiedDate").value(Matchers.startsWith(member.getModifiedDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()));
     }
+
+    @Test
+    @DisplayName("로그인")
+    void t2() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/members/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "username": "user1",
+                                            "password": "1234"
+                                        }
+                                        """.stripIndent())
+                )
+                .andDo(print());
+
+        Member member = memberService.findByUsername("user1").get();
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1MemberController.class))
+                .andExpect(handler().methodName("login"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.message").value("%s님 환영합니다.".formatted(member.getNickname())))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.item").exists())
+                .andExpect(jsonPath("$.data.item.id").value(member.getId()))
+                .andExpect(jsonPath("$.data.item.createdDate").value(Matchers.startsWith(member.getCreatedDate().toString().substring(0, 25))))
+                .andExpect(jsonPath("$.data.item.modifiedDate").value(Matchers.startsWith(member.getModifiedDate().toString().substring(0, 25))))
+                .andExpect(jsonPath("$.data.item.nickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.data.apiKey").value(member.getApiKey()));
+    }
 }
