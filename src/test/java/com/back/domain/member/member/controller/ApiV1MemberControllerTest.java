@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -92,5 +93,31 @@ public class ApiV1MemberControllerTest {
                 .andExpect(jsonPath("$.data.item.modifiedDate").value(Matchers.startsWith(member.getModifiedDate().toString().substring(0, 25))))
                 .andExpect(jsonPath("$.data.item.nickname").value(member.getNickname()))
                 .andExpect(jsonPath("$.data.apiKey").value(member.getApiKey()));
+    }
+
+    @Test
+    @DisplayName("내 정보 불러오기")
+    void t3() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+        String authorApiKey = member.getApiKey();
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/members/me")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1MemberController.class))
+                .andExpect(handler().methodName("me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.message").value("%s님 정보입니다.".formatted(member.getNickname())))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(member.getId()))
+                .andExpect(jsonPath("$.data.createdDate").value(Matchers.startsWith(member.getCreatedDate().toString().substring(0, 25))))
+                .andExpect(jsonPath("$.data.modifiedDate").value(Matchers.startsWith(member.getModifiedDate().toString().substring(0, 25))))
+                .andExpect(jsonPath("$.data.nickname").value(member.getNickname()));
     }
 }
