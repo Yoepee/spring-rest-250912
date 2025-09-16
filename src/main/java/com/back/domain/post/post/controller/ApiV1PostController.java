@@ -1,14 +1,12 @@
 package com.back.domain.post.post.controller;
 
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.dto.PostDto;
 import com.back.domain.post.post.dto.PostUpdateReqBody;
 import com.back.domain.post.post.dto.PostUpdateResBody;
 import com.back.domain.post.post.dto.PostWriteReqBody;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
-import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +27,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Tag(name = "ApiV1PostController", description = "API 글 컨트롤러")
 public class ApiV1PostController {
     private final PostService postService;
-    private final MemberService memberService;
     private final Rq rq;
 
     @GetMapping(produces = APPLICATION_JSON_VALUE)
@@ -57,9 +54,7 @@ public class ApiV1PostController {
         Member actor = rq.getActor();
         Post post = postService.findById(id);
 
-        if (!actor.equals(post.getAuthor())) {
-            throw new ServiceException("403-1", "작성자만 게시글을 삭제할 수 있습니다.");
-        }
+        post.checkActorCanDelete(actor);
         postService.delete(post);
 
         return new RsData<>(
@@ -95,9 +90,7 @@ public class ApiV1PostController {
         Member actor = rq.getActor();
         Post post = postService.findById(id);
 
-        if (!actor.equals(post.getAuthor())) {
-            throw new ServiceException("403-1", "작성자만 게시글을 수정할 수 있습니다.");
-        }
+        post.checkActorCanModify(actor);
         postService.update(post, reqBody.title(), reqBody.content());
 
         return new RsData<>(

@@ -2,6 +2,7 @@ package com.back.domain.post.post.entity;
 
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.post.postComment.entity.PostComment;
+import com.back.global.exception.ServiceException;
 import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -63,5 +64,17 @@ public class Post extends BaseEntity {
         if (postComment == null) return false;
 
         return postComments.remove(postComment);
+    }
+
+    public void checkActorCanModify(Member actor) {
+        if (!actor.equals(this.author)) {
+            throw new ServiceException("403-1", "작성자만 게시글을 수정할 수 있습니다.");
+        }
+    }
+
+    public void checkActorCanDelete(Member actor) {
+        if (!actor.equals(this.author)) {
+            throw new ServiceException("403-1", "작성자만 게시글을 삭제할 수 있습니다.");
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.back.domain.post.postComment.controller;
 
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import com.back.domain.post.postComment.dto.PostCommentDto;
@@ -9,7 +8,6 @@ import com.back.domain.post.postComment.dto.PostCommentUpdateReqDto;
 import com.back.domain.post.postComment.dto.PostCommentWriteReqBody;
 import com.back.domain.post.postComment.entity.PostComment;
 import com.back.domain.post.postComment.service.PostCommentService;
-import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +27,6 @@ import java.util.stream.Collectors;
 public class ApiV1PostCommentController {
     private final PostService postService;
     private final PostCommentService postCommentService;
-    private final MemberService memberService;
     private final Rq rq;
 
     @GetMapping("")
@@ -64,9 +61,7 @@ public class ApiV1PostCommentController {
         Member actor = rq.getActor();
         Post post = postService.findById(postId);
         PostComment postComment = postCommentService.getCommentById(post, id);
-        if (!actor.equals(postComment.getAuthor())) {
-            throw new ServiceException("403-1", "작성자만 댓글을 삭제할 수 있습니다.");
-        }
+        postComment.checkActorCanDelete(actor);
 
         postCommentService.delete(post, postComment);
 
@@ -98,12 +93,10 @@ public class ApiV1PostCommentController {
             @PathVariable Long id,
             @Valid @RequestBody PostCommentUpdateReqDto reqBody
     ) {
-        Member author = rq.getActor();
+        Member actor = rq.getActor();
         Post post = postService.findById(postId);
         PostComment postComment = postCommentService.getCommentById(post, id);
-        if (!author.equals(postComment.getAuthor())) {
-            throw new ServiceException("403-1", "작성자만 댓글을 수정할 수 있습니다.");
-        }
+        postComment.checkActorCanModify(actor);
 
         postCommentService.update(post, postComment, reqBody.content());
 
