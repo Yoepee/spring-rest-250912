@@ -331,4 +331,30 @@ public class ApiV1PostControllerTest {
                         """.stripIndent().trim()));
 
     }
+
+    @Test
+    @DisplayName("글 쓰기 - 유효하지 않은 authorization, 401")
+    void t12() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                post("/api/v1/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer wrong")
+                        .content("""
+                                {
+                                  "title": "제목 new",
+                                  "content": "내용 new"
+                                }
+                                """)
+        ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-3"))
+                .andExpect(jsonPath("$.message").value("""
+                        회원을 찾을 수 없습니다.
+                        """.stripIndent().trim()));
+
+    }
 }
