@@ -16,14 +16,14 @@ public class Rq {
     public Member getActor() {
         String headerAuthorization = req.getHeader("Authorization");
         if (headerAuthorization == null || headerAuthorization.isBlank()) {
-            throw new ServiceException("401-1", "Authorization 헤더가 존재하지 않습니다.");
+            throw new ServiceException("401-1", "로그인 후 사용해주세요.");
         }
         if (!headerAuthorization.startsWith("Bearer ")) {
-            throw new ServiceException("401-2", "Bearer 토큰이 존재하지 않습니다.");
+            throw new ServiceException("401-2", "인증 정보가 올바르지 않습니다.");
         }
 
         String apiKey = headerAuthorization.substring("Bearer ".length()).trim();
 
-        return memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-3", "유효하지 않은 API Key 입니다."));
+        return memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
     }
 }
