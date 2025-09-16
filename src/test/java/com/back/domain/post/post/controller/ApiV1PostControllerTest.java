@@ -389,7 +389,7 @@ public class ApiV1PostControllerTest {
     }
 
     @Test
-    @DisplayName("글 삭제 - 다른 계정 토큰, 401")
+    @DisplayName("글 삭제 - 다른 계정 토큰, 403")
     void t14() throws Exception {
         long id = 1;
         Member member = memberService.findByUsername("user2").get();
