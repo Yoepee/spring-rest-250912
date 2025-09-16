@@ -39,8 +39,8 @@ public class ApiV1PostControllerTest {
     @DisplayName("글 쓰기")
     void t1() throws Exception {
         Member member = memberService.findByUsername("user1").get();
-
         String authorApiKey = member.getApiKey();
+
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts?apiKey=%s".formatted(authorApiKey))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,9 +193,13 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 - 제목 누락, 400")
     void t7() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+        String authorApiKey = member.getApiKey();
+
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
                         .content("""
                                 {
                                   "title": "",
@@ -219,9 +223,13 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 - 내용 누락, 400")
     void t8() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+        String authorApiKey = member.getApiKey();
+
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
                         .content("""
                                 {
                                   "title": "제목 new",
@@ -245,9 +253,13 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 - JSON 문법 에러, 400")
     void t9() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+        String authorApiKey = member.getApiKey();
+
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
                         .content("""
                                 {
                                   "title": "제목 new",
