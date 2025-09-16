@@ -4,16 +4,17 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
-import com.back.domain.post.postComment.dto.*;
+import com.back.domain.post.postComment.dto.PostCommentDto;
+import com.back.domain.post.postComment.dto.PostCommentUpdateReqDto;
+import com.back.domain.post.postComment.dto.PostCommentWriteReqBody;
 import com.back.domain.post.postComment.entity.PostComment;
 import com.back.domain.post.postComment.service.PostCommentService;
 import com.back.global.exception.ServiceException;
+import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,7 @@ public class ApiV1PostCommentController {
     private final PostService postService;
     private final PostCommentService postCommentService;
     private final MemberService memberService;
+    private final Rq rq;
 
     @GetMapping("")
     @Transactional(readOnly = true)
@@ -57,11 +59,9 @@ public class ApiV1PostCommentController {
     @Operation(summary = "삭제")
     public RsData<Void> delete(
             @PathVariable Long postId,
-            @PathVariable Long id,
-            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+            @PathVariable Long id
     ) {
-        String apiKey = authorization.replace("Bearer ", "");
-        Member author = memberService.findByApiKey(apiKey).get();
+        Member author = rq.getActor();
         Post post = postService.findById(postId);
         PostComment postComment = postCommentService.getCommentById(post, id);
         if (!author.equals(postComment.getAuthor())) {
@@ -78,13 +78,10 @@ public class ApiV1PostCommentController {
     @Operation(summary = "작성")
     public RsData<PostCommentDto> write(
             @PathVariable Long postId,
-            @Valid @RequestBody PostCommentWriteReqBody reqBody,
-            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+            @Valid @RequestBody PostCommentWriteReqBody reqBody
     ) {
-        String apiKey = authorization.replace("Bearer ", "");
-        Member author = memberService.findByApiKey(apiKey).get();
+        Member author = rq.getActor();
         Post post = postService.findById(postId);
-        System.out.println(post);
         PostComment postComment = postCommentService.create(author, post, reqBody.content());
         return new RsData<>(
                 "201-1",
@@ -99,11 +96,9 @@ public class ApiV1PostCommentController {
     public RsData<PostCommentDto> update(
             @PathVariable Long postId,
             @PathVariable Long id,
-            @Valid @RequestBody PostCommentUpdateReqDto reqBody,
-            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+            @Valid @RequestBody PostCommentUpdateReqDto reqBody
     ) {
-        String apiKey = authorization.replace("Bearer ", "");
-        Member author = memberService.findByApiKey(apiKey).get();
+        Member author = rq.getActor();
         Post post = postService.findById(postId);
         PostComment postComment = postCommentService.getCommentById(post, id);
         if (!author.equals(postComment.getAuthor())) {
