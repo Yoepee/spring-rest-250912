@@ -54,10 +54,10 @@ public class ApiV1PostController {
     public RsData<PostDto> delete(
             @PathVariable Long id
     ) {
-        Member author = rq.getActor();
+        Member actor = rq.getActor();
         Post post = postService.findById(id);
 
-        if (!author.equals(post.getAuthor())) {
+        if (!actor.equals(post.getAuthor())) {
             throw new ServiceException("403-1", "작성자만 게시글을 삭제할 수 있습니다.");
         }
         postService.delete(post);
@@ -75,8 +75,8 @@ public class ApiV1PostController {
     public RsData<PostDto> write(
             @RequestBody @Valid PostWriteReqBody reqBody
     ) {
-        Member author = rq.getActor();
-        Post post = postService.create(author, reqBody.title(), reqBody.content());
+        Member actor = rq.getActor();
+        Post post = postService.create(actor, reqBody.title(), reqBody.content());
 
         return new RsData<>(
                 "201-1",
@@ -92,10 +92,10 @@ public class ApiV1PostController {
             @PathVariable Long id,
             @Valid @RequestBody PostUpdateReqBody reqBody
     ) {
-        Member author = rq.getActor();
+        Member actor = rq.getActor();
         Post post = postService.findById(id);
 
-        if (!author.equals(post.getAuthor())) {
+        if (!actor.equals(post.getAuthor())) {
             throw new ServiceException("403-1", "작성자만 게시글을 수정할 수 있습니다.");
         }
         postService.update(post, reqBody.title(), reqBody.content());

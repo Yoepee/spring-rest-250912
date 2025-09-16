@@ -61,10 +61,10 @@ public class ApiV1PostCommentController {
             @PathVariable Long postId,
             @PathVariable Long id
     ) {
-        Member author = rq.getActor();
+        Member actor = rq.getActor();
         Post post = postService.findById(postId);
         PostComment postComment = postCommentService.getCommentById(post, id);
-        if (!author.equals(postComment.getAuthor())) {
+        if (!actor.equals(postComment.getAuthor())) {
             throw new ServiceException("403-1", "작성자만 댓글을 삭제할 수 있습니다.");
         }
 
@@ -80,9 +80,9 @@ public class ApiV1PostCommentController {
             @PathVariable Long postId,
             @Valid @RequestBody PostCommentWriteReqBody reqBody
     ) {
-        Member author = rq.getActor();
+        Member actor = rq.getActor();
         Post post = postService.findById(postId);
-        PostComment postComment = postCommentService.create(author, post, reqBody.content());
+        PostComment postComment = postCommentService.create(actor, post, reqBody.content());
         return new RsData<>(
                 "201-1",
                 "%d번 댓글이 생성되었습니다.".formatted(postComment.getId()),
