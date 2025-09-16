@@ -51,8 +51,17 @@ public class ApiV1PostController {
     @DeleteMapping("/{id}")
     @Transactional
     @Operation(summary = "삭제")
-    public RsData<PostDto> delete(@PathVariable Long id) {
+    public RsData<PostDto> delete(
+            @PathVariable Long id,
+            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+    ) {
+        String apiKey = authorization.replace("Bearer ", "");
+        Member author = memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
         Post post = postService.findById(id);
+
+        if (!author.equals(post.getAuthor())) {
+            throw new ServiceException("403-1", "작성자만 게시글을 삭제할 수 있습니다.");
+        }
         postService.delete(post);
 
         return new RsData<>(
@@ -65,7 +74,10 @@ public class ApiV1PostController {
     @PostMapping("")
     @Transactional
     @Operation(summary = "작성")
-    public RsData<PostDto> write(@Valid @RequestBody PostWriteReqBody reqBody, @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization) {
+    public RsData<PostDto> write(
+            @Valid @RequestBody PostWriteReqBody reqBody,
+            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+    ) {
         String apiKey = authorization.replace("Bearer ", "");
         Member author = memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
         Post post = postService.create(author, reqBody.title(), reqBody.content());
@@ -80,8 +92,18 @@ public class ApiV1PostController {
     @PutMapping("/{id}")
     @Transactional
     @Operation(summary = "수정")
-    public RsData<PostUpdateResBody> update(@PathVariable Long id, @Valid @RequestBody PostUpdateReqBody reqBody) {
+    public RsData<PostUpdateResBody> update(
+            @PathVariable Long id,
+            @Valid @RequestBody PostUpdateReqBody reqBody,
+            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+    ) {
+        String apiKey = authorization.replace("Bearer ", "");
+        Member author = memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
         Post post = postService.findById(id);
+
+        if (!author.equals(post.getAuthor())) {
+            throw new ServiceException("403-1", "작성자만 게시글을 수정할 수 있습니다.");
+        }
         postService.update(post, reqBody.title(), reqBody.content());
 
         return new RsData<>(

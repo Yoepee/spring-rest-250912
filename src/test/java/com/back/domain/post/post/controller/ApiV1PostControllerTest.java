@@ -44,6 +44,7 @@ public class ApiV1PostControllerTest {
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts?apiKey=%s".formatted(authorApiKey))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
                         .content("""
                                 {
                                   "title": "제목 new",
@@ -72,9 +73,14 @@ public class ApiV1PostControllerTest {
     @DisplayName("글 수정")
     void t2() throws Exception {
         long id = 1;
+
+        Post post = postService.findById(id);
+        String authorApiKey = post.getAuthor().getApiKey();
+
         ResultActions resultActions = mvc.perform(
                 put("/api/v1/posts/%d".formatted(id))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
                         .content("""
                                 {
                                   "title": "제목 update",
@@ -82,8 +88,6 @@ public class ApiV1PostControllerTest {
                                 }
                                 """)
         ).andDo(print());
-
-        Post post = postService.findById(id);
 
         resultActions
                 .andExpect(status().isOk())
@@ -102,8 +106,12 @@ public class ApiV1PostControllerTest {
     void t3() throws Exception {
         long id = 3;
 
+        Post post = postService.findById(id);
+        String authorApiKey = post.getAuthor().getApiKey();
+
         ResultActions resultActions = mvc.perform(
                 delete("/api/v1/posts/%d".formatted(id))
+                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
         ).andDo(print());
 
         resultActions
