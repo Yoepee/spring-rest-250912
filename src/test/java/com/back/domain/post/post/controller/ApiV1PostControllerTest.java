@@ -278,4 +278,29 @@ public class ApiV1PostControllerTest {
                         """.stripIndent().trim()));
 
     }
+
+    @Test
+    @DisplayName("글 쓰기 - 헤더 누락 authorization, 401")
+    void t10() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                post("/api/v1/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "제목 new",
+                                  "content": "내용 new"
+                                }
+                                """)
+        ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-1"))
+                .andExpect(jsonPath("$.message").value("""
+                        로그인 후 사용해주세요.
+                        """.stripIndent().trim()));
+
+    }
 }
