@@ -357,4 +357,57 @@ public class ApiV1PostControllerTest {
                         """.stripIndent().trim()));
 
     }
+
+    @Test
+    @DisplayName("글 수정 - 다른 계정 토큰, 403")
+    void t13() throws Exception {
+        long id = 1;
+        Member member = memberService.findByUsername("user2").get();
+        String authorApiKey = member.getApiKey();
+
+        ResultActions resultActions = mvc.perform(
+                put("/api/v1/posts/%d".formatted(id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .content("""
+                                {
+                                  "title": "제목 update",
+                                  "content": "내용 update"
+                                }
+                                """)
+        ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("update"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.message").value("""
+                        작성자만 게시글을 수정할 수 있습니다.
+                        """.stripIndent().trim()));
+
+    }
+
+    @Test
+    @DisplayName("글 삭제 - 다른 계정 토큰, 401")
+    void t14() throws Exception {
+        long id = 1;
+        Member member = memberService.findByUsername("user2").get();
+        String authorApiKey = member.getApiKey();
+
+        ResultActions resultActions = mvc.perform(
+                delete("/api/v1/posts/%d".formatted(id))
+                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+        ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.message").value("""
+                        작성자만 게시글을 삭제할 수 있습니다.
+                        """.stripIndent().trim()));
+
+    }
 }
