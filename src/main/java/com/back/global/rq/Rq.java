@@ -44,6 +44,14 @@ public class Rq {
         resp.addCookie(cookie);
     }
 
+    public void removeCookie(String name) {
+        Cookie cookie = new Cookie(name, "");
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        resp.addCookie(cookie);
+    }
+
     private String getHeader(String name, String defaultValue) {
         return Optional.ofNullable(req.getHeader(name))
                 .filter(header -> !header.isBlank())
