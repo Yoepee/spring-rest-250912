@@ -3,7 +3,9 @@ package com.back.global.rq;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class Rq {
     private final MemberService memberService;
     private final HttpServletRequest req;
+    private final HttpServletResponse resp;
 
     public Member getActor() {
         String headerAuthorization = req.getHeader("Authorization");
@@ -25,5 +28,12 @@ public class Rq {
         String apiKey = headerAuthorization.substring("Bearer ".length()).trim();
 
         return memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
+    }
+
+    public void setCookie(String name, String value) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        resp.addCookie(cookie);
     }
 }
