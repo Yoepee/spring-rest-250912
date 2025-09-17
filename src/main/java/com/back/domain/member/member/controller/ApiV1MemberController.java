@@ -10,6 +10,8 @@ import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -34,13 +36,18 @@ public class ApiV1MemberController {
     }
 
     @PostMapping("/login")
-    public RsData<MemberLoginResBody> login(@Valid @RequestBody MemberLoginReqBody reqBody) {
+    public RsData<MemberLoginResBody> login(@Valid @RequestBody MemberLoginReqBody reqBody, HttpServletResponse response) {
         Member member = memberService.findByUsername(reqBody.username())
                 .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
 
         if (!member.getPassword().equals(reqBody.password())) {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
+
+        Cookie cookie = new Cookie("apiKey", member.getApiKey());
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
 
         return new RsData<>(
                 "200-1",
