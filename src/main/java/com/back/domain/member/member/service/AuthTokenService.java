@@ -13,8 +13,8 @@ public class AuthTokenService {
         int expireSec = 60 * 60 * 24 * 365;
         long id = member.getId();
         String username = member.getUsername();
-
         Map<String, Object> claims = Map.of("id", id, "username", username);
+
         return Ut.jwt.toString(secret, expireSec, claims);
     }
 }

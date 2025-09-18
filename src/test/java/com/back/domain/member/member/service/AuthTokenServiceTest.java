@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -62,6 +62,13 @@ public class AuthTokenServiceTest {
         assertThat(jwt).isNotBlank();
 
         System.out.println("jwt : " + jwt);
+        Map<String,Object> parsePayload = (Map<String, Object>) Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parse(jwt)
+                        .getPayload();
+        System.out.println("parse : " + parsePayload);
+        assertThat(parsePayload).containsAllEntriesOf(claims);
     }
 
     @Test
