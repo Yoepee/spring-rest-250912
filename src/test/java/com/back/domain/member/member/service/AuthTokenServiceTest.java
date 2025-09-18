@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 public class AuthTokenServiceTest {
-    String secret = "abcdefghijklmnopqrstuvwxyz123456789abcdefghijklmnopqrstuvwxyz123456789";
+    @Value("${custom.jwt.secretKey}")
+    private String jwtSecretKey;
+
+    @Value("${custom.accessToken.expireSeconds}")
+    private int accessTokenExpireSeconds;
 
     @Autowired
     private AuthTokenService authTokenService;
@@ -46,8 +51,8 @@ public class AuthTokenServiceTest {
 //          예) {name="Paul", age=20}
 //        생성시간 (Issued At : iat)
 //        만료시간 (Expiration Time : exp)
-        long expireMillis = 1000L * 60 * 60 * 24 * 365; // 1년
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        long expireMillis = 1000L * accessTokenExpireSeconds; // 1년
+        byte[] keyBytes = jwtSecretKey.getBytes(StandardCharsets.UTF_8);
         SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
         Date issuedAt = new Date();
         Date expiration =new Date(issuedAt.getTime() + expireMillis);
@@ -64,22 +69,21 @@ public class AuthTokenServiceTest {
 
         System.out.println("jwt : " + jwt);
 
-        assertThat(Ut.jwt.isValid(secret, jwt)).isTrue();
-        assertThat(Ut.jwt.payload(secret, jwt)).containsAllEntriesOf(claims);
+        assertThat(Ut.jwt.isValid(jwtSecretKey, jwt)).isTrue();
+        assertThat(Ut.jwt.payload(jwtSecretKey, jwt)).containsAllEntriesOf(claims);
     }
 
     @Test
     @DisplayName("Ut.jwt.toString으로 jwt 생성, {name: \"David\", age=20}")
     void t3() {
-        int expireSec = 60 * 60 * 24 * 365;
         Map<String, Object> claims = Map.of("name", "David", "age", 20);
-        String jwt = Ut.jwt.toString(secret, expireSec, claims);
+        String jwt = Ut.jwt.toString(jwtSecretKey, accessTokenExpireSeconds, claims);
         assertThat(jwt).isNotBlank();
 
         System.out.println("jwt : " + jwt);
 
-        assertThat(Ut.jwt.isValid(secret, jwt)).isTrue();
-        assertThat(Ut.jwt.payload(secret, jwt)).containsAllEntriesOf(claims);
+        assertThat(Ut.jwt.isValid(jwtSecretKey, jwt)).isTrue();
+        assertThat(Ut.jwt.payload(jwtSecretKey, jwt)).containsAllEntriesOf(claims);
     }
 
     @Test
@@ -90,7 +94,7 @@ public class AuthTokenServiceTest {
         assertThat(jwt).isNotBlank();
 
         System.out.println("jwt : " + jwt);
-        assertThat(Ut.jwt.isValid(secret, jwt)).isTrue();
+        assertThat(Ut.jwt.isValid(jwtSecretKey, jwt)).isTrue();
 
         Map<String, Object> payload = authTokenService.payload(jwt);
         System.out.println("payload : " + payload);
