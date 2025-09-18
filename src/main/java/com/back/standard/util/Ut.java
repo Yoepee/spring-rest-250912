@@ -10,14 +10,14 @@ import java.util.Map;
 
 public class Ut {
     public static class jwt {
-        public static  String toString(String secret, long expire, Map<String, Object> body) {
+        public static  String toString(String secret, int expireSec, Map<String, Object> claims) {
             byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
             SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
             Date issedAt = new Date();
-            Date expiration = new Date(issedAt.getTime() + expire);
+            Date expiration = new Date(issedAt.getTime() + 1000L * expireSec);
 
             return Jwts.builder()
-                    .claims(body) // 사용자 정보
+                    .claims(claims) // 사용자 정보
                     .issuedAt(issedAt) // 생성시간
                     .expiration(expiration) // 만료시간
                     .signWith(secretKey) // 서명키
