@@ -38,18 +38,16 @@ public class Rq {
     }
 
     public void setCookie(String name, String value) {
+        if (value == null) value = "";
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+        if (value.isBlank()) cookie.setMaxAge(0);
         resp.addCookie(cookie);
     }
 
     public void removeCookie(String name) {
-        Cookie cookie = new Cookie(name, "");
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setHttpOnly(true);
-        resp.addCookie(cookie);
+        setCookie(name, null);
     }
 
     private String getHeader(String name, String defaultValue) {
