@@ -91,6 +91,9 @@ public class AuthTokenServiceTest {
 
         System.out.println("jwt : " + jwt);
         assertThat(Ut.jwt.isValid(secret, jwt)).isTrue();
-        assertThat(Ut.jwt.payload(secret, jwt)).containsAllEntriesOf(Map.of("id", (int)member.getId(), "username", member.getUsername()));
+
+        Map<String, Object> payload = authTokenService.payload(jwt);
+        System.out.println("payload : " + payload);
+        assertThat(payload).containsAllEntriesOf(Map.of("id", member.getId(), "username", member.getUsername()));
     }
 }
