@@ -65,16 +65,21 @@ public class AuthTokenServiceTest {
         System.out.println("jwt : " + jwt);
 
         assertThat(Ut.jwt.isValid(secret, jwt)).isTrue();
+        assertThat(Ut.jwt.payload(secret, jwt)).containsAllEntriesOf(claims);
     }
 
     @Test
     @DisplayName("Ut.jwt.toString으로 jwt 생성, {name: \"David\", age=20}")
     void t3() {
         int expireSec = 60 * 60 * 24 * 365;
-        String jwt = Ut.jwt.toString(secret, expireSec, Map.of("name", "David", "age", 20));
+        Map<String, Object> claims = Map.of("name", "David", "age", 20);
+        String jwt = Ut.jwt.toString(secret, expireSec, claims);
         assertThat(jwt).isNotBlank();
 
         System.out.println("jwt : " + jwt);
+
+        assertThat(Ut.jwt.isValid(secret, jwt)).isTrue();
+        assertThat(Ut.jwt.payload(secret, jwt)).containsAllEntriesOf(claims);
     }
 
     @Test
@@ -85,5 +90,7 @@ public class AuthTokenServiceTest {
         assertThat(jwt).isNotBlank();
 
         System.out.println("jwt : " + jwt);
+        assertThat(Ut.jwt.isValid(secret, jwt)).isTrue();
+        assertThat(Ut.jwt.payload(secret, jwt)).containsAllEntriesOf(Map.of("id", (int)member.getId(), "username", member.getUsername()));
     }
 }
