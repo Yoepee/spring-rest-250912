@@ -11,17 +11,31 @@ import java.util.Map;
 public class Ut {
     public static class jwt {
         public static  String toString(String secret, int expireSec, Map<String, Object> claims) {
-            byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-            SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-            Date issedAt = new Date();
-            Date expiration = new Date(issedAt.getTime() + 1000L * expireSec);
+            SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+            Date issuedAt = new Date();
+            Date expiration = new Date(issuedAt.getTime() + 1000L * expireSec);
 
             return Jwts.builder()
                     .claims(claims) // 사용자 정보
-                    .issuedAt(issedAt) // 생성시간
+                    .issuedAt(issuedAt) // 생성시간
                     .expiration(expiration) // 만료시간
                     .signWith(secretKey) // 서명키
                     .compact();
+        }
+
+        public static boolean isValid(String secret, String jwtStr){
+            SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+            try {
+                Jwts.
+                        parser()
+                        .verifyWith(secretKey)
+                        .build()
+                        .parse(jwtStr);
+            } catch (Exception e) {
+                return false;
+            }
+
+            return true;
         }
     }
 }

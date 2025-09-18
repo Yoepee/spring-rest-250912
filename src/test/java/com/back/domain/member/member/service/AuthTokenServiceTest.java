@@ -22,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 public class AuthTokenServiceTest {
+    String secret = "abcdefghijklmnopqrstuvwxyz123456789abcdefghijklmnopqrstuvwxyz123456789";
+
     @Autowired
     private AuthTokenService authTokenService;
 
@@ -45,16 +47,15 @@ public class AuthTokenServiceTest {
 //        생성시간 (Issued At : iat)
 //        만료시간 (Expiration Time : exp)
         long expireMillis = 1000L * 60 * 60 * 24 * 365; // 1년
-        String originSecretKey = "abcdefghijklmnopqrstuvwxyz123456789abcdefghijklmnopqrstuvwxyz123456789"; // 32byte 이상
-        byte[] keyBytes = originSecretKey.getBytes(StandardCharsets.UTF_8);
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-        Date issedAt = new Date();
-        Date expiration =new Date(issedAt.getTime() + expireMillis);
+        Date issuedAt = new Date();
+        Date expiration =new Date(issuedAt.getTime() + expireMillis);
 
         Map<String, Object> claims = Map.of("name", "Paul", "age", 23);
         String jwt = Jwts.builder()
                 .claims(claims) // 사용자 정보
-                .issuedAt(issedAt) // 생성시간
+                .issuedAt(issuedAt) // 생성시간
                 .expiration(expiration) // 만료시간
                 .signWith(secretKey) // 서명키
                 .compact();
@@ -62,19 +63,13 @@ public class AuthTokenServiceTest {
         assertThat(jwt).isNotBlank();
 
         System.out.println("jwt : " + jwt);
-        Map<String,Object> parsePayload = (Map<String, Object>) Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parse(jwt)
-                        .getPayload();
-        System.out.println("parse : " + parsePayload);
-        assertThat(parsePayload).containsAllEntriesOf(claims);
+
+        assertThat(Ut.jwt.isValid(secret, jwt)).isTrue();
     }
 
     @Test
     @DisplayName("Ut.jwt.toString으로 jwt 생성, {name: \"David\", age=20}")
     void t3() {
-        String secret = "abcdefghijklmnopqrstuvwxyz123456789abcdefghijklmnopqrstuvwxyz123456789";
         int expireSec = 60 * 60 * 24 * 365;
         String jwt = Ut.jwt.toString(secret, expireSec, Map.of("name", "David", "age", 20));
         assertThat(jwt).isNotBlank();
