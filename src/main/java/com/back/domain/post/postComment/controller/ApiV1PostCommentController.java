@@ -11,6 +11,7 @@ import com.back.domain.post.postComment.service.PostCommentService;
 import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/posts/{postId}/comments")
 @Tag(name = "ApiV1PostCommentController", description = "API 댓글 컨트롤러")
+@SecurityRequirement(name="bearerAuth")
 public class ApiV1PostCommentController {
     private final PostService postService;
     private final PostCommentService postCommentService;
