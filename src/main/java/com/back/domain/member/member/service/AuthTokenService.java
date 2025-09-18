@@ -23,7 +23,7 @@ public class AuthTokenService {
         Map<String, Object> parsePayload = Ut.jwt.payload(secret, accessToken);
         if (parsePayload == null) return null;
 
-        long id = (int) parsePayload.get("id");
+        long id = ((Number) parsePayload.get("id")).longValue();
         String username = (String) parsePayload.get("username");
         return Map.of("id", id, "username", username);
     }
