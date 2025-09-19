@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
-public class AuthTokenService {
+class AuthTokenService {
     @Value("${custom.jwt.secretKey}")
     private String jwtSecretKey;
 
     @Value("${custom.accessToken.expireSeconds}")
     private int accessTokenExpireSeconds;
 
-    public String genAccessToken(Member member) {
+    String genAccessToken(Member member) {
         long id = member.getId();
         String username = member.getUsername();
         Map<String, Object> claims = Map.of("id", id, "username", username);
@@ -23,7 +23,7 @@ public class AuthTokenService {
         return Ut.jwt.toString(jwtSecretKey, accessTokenExpireSeconds, claims);
     }
 
-    public Map<String, Object> payload(String accessToken) {
+    Map<String, Object> payload(String accessToken) {
         Map<String, Object> parsePayload = Ut.jwt.payload(jwtSecretKey, accessToken);
         if (parsePayload == null) return null;
 
