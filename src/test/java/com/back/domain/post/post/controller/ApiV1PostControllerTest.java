@@ -4,6 +4,7 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
+import jakarta.servlet.http.Cookie;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,11 +41,14 @@ public class ApiV1PostControllerTest {
     void t1() throws Exception {
         Member member = memberService.findByUsername("user1").get();
         String authorApiKey = member.getApiKey();
+        String accessToken = memberService.genAccessToken(member);
 
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts?apiKey=%s".formatted(authorApiKey))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
                         .content("""
                                 {
                                   "title": "제목 new",
