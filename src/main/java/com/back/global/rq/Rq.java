@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -22,19 +23,34 @@ public class Rq {
     public Member getActor() {
         String headerAuthorization = getHeader("Authorization", "");
         String apiKey;
+        String accessToken;
         if (!headerAuthorization.isBlank()) {
             if (!headerAuthorization.startsWith("Bearer ")) {
                 throw new ServiceException("401-2", "인증 정보가 올바르지 않습니다.");
             }
 
-            apiKey = headerAuthorization.substring("Bearer ".length()).trim();
+//            apiKey = headerAuthorization.substring("Bearer ".length()).trim();
+            String[] headerAuthorizationBits = headerAuthorization.split("", 3);
+            apiKey = headerAuthorizationBits[1].trim();
+            accessToken = headerAuthorizationBits.length == 3 ? headerAuthorizationBits[2].trim() : "";
         } else {
             apiKey = getCookieValue("apiKey", "");
+            accessToken = getCookieValue("accessToken", "");
         }
 
         if (apiKey.isBlank()) throw new ServiceException("401-1", "로그인 후 사용해주세요.");
 
-        return memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
+        Member member = null;
+        if (!accessToken.isBlank()) {
+            Map<String, Object> payload = memberService.payload(accessToken);
+
+            if (payload != null){
+                long id = (Long) payload.get("id");
+                member = memberService.findById(id)
+                        .orElseThrow(() -> new ServiceException("401-3", "존재하지 않는 회원입니다."));
+            }
+        }
+        return member;
     }
 
     public void setCookie(String name, String value) {
