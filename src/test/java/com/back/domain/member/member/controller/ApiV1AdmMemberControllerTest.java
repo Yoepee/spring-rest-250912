@@ -2,12 +2,14 @@ package com.back.domain.member.member.controller;
 
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
+import jakarta.servlet.http.Cookie;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -33,8 +35,16 @@ public class ApiV1AdmMemberControllerTest {
     @Test
     @DisplayName("관리자용 맴버 리스트 조회")
     void t1() throws Exception {
+        Member admin = memberService.findByUsername("admin").get();
+        String authorApiKey = admin.getApiKey();
+        String accessToken = memberService.genAccessToken(admin);
+
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         List<Member> members = memberService.findAll();
@@ -62,8 +72,15 @@ public class ApiV1AdmMemberControllerTest {
     void t2() throws Exception {
         long id = 1;
 
+        Member admin = memberService.findByUsername("admin").get();
+        String authorApiKey = admin.getApiKey();
+        String accessToken = memberService.genAccessToken(admin);
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/members/%d".formatted(id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         Member member = memberService.findById(id).get();
@@ -77,5 +94,30 @@ public class ApiV1AdmMemberControllerTest {
                 .andExpect(jsonPath("$.modifiedDate").value(Matchers.startsWith(member.getModifiedDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.nickname").value(member.getNickname()))
                 .andExpect(jsonPath("$.username").value(member.getUsername()));
+    }
+
+    @Test
+    @DisplayName("관리자용 맴버 리스트 조회 실패, 403")
+    void t3() throws Exception {
+        Member admin = memberService.findByUsername("user1").get();
+        String authorApiKey = admin.getApiKey();
+        String accessToken = memberService.genAccessToken(admin);
+
+        ResultActions resultActions = mvc.perform(
+                get("/api/v1/adm/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
+        ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1AdmMemberController.class))
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.message").value("""
+                        권한이 없습니다.
+                        """.stripIndent().trim()));
     }
 }

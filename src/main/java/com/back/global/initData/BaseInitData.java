@@ -37,15 +37,15 @@ public class BaseInitData {
     public void work1() {
         if (memberService.count() > 0) return;
 
-        Member memberSystem =memberService.join("user1", "1234", "유저1");
+        Member memberSystem =memberService.join("system", "1234", "시스템");
         if(AppConfig.isNotProd()) memberSystem.modifyApiKey(memberSystem.getUsername());
-        Member memberAdmin = memberService.join("user2", "1234", "유저2");
+        Member memberAdmin = memberService.join("admin", "1234", "관리자");
         if(AppConfig.isNotProd()) memberAdmin.modifyApiKey(memberAdmin.getUsername());
-        Member memberUser1 = memberService.join("user3", "1234", "유저3");
+        Member memberUser1 = memberService.join("user1", "1234", "유저1");
         if(AppConfig.isNotProd()) memberUser1.modifyApiKey(memberUser1.getUsername());
-        Member memberUser2 = memberService.join("user4", "1234", "유저4");
+        Member memberUser2 = memberService.join("user2", "1234", "유저2");
         if(AppConfig.isNotProd()) memberUser2.modifyApiKey(memberUser2.getUsername());
-        Member memberUser3 = memberService.join("user5", "1234", "유저5");
+        Member memberUser3 = memberService.join("user3", "1234", "유저3");
         if(AppConfig.isNotProd()) memberUser3.modifyApiKey(memberUser3.getUsername());
     }
 
