@@ -80,13 +80,13 @@ public class Rq {
         setCookie(name, null);
     }
 
-    private String getHeader(String name, String defaultValue) {
+    public String getHeader(String name, String defaultValue) {
         return Optional.ofNullable(req.getHeader(name))
                 .filter(header -> !header.isBlank())
                 .orElse(defaultValue);
     }
 
-    private String getCookieValue(String name, String defaultValue) {
+    public String getCookieValue(String name, String defaultValue) {
         return Optional.ofNullable(req.getCookies())
                 .flatMap(cookies ->
                         Arrays.stream(cookies)
