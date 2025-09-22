@@ -1,0 +1,79 @@
+package com.back.domain.post.post.controller;
+
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
+import com.back.domain.post.post.service.PostService;
+import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@ActiveProfiles("test")
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+public class ApiV1AdmPostControllerTest {
+    @Autowired
+    private MockMvc mvc;
+    @Autowired
+    private PostService postService;
+    @Autowired
+    private MemberService memberService;
+
+    @Test
+    @DisplayName("관리자용 게시글 수 통계")
+    void t1() throws Exception {
+        Member admin = memberService.findByUsername("admin").get();
+        String authorApiKey = admin.getApiKey();
+        String accessToken = memberService.genAccessToken(admin);
+
+        ResultActions resultActions = mvc.perform(
+                get("/api/v1/adm/posts/count")
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
+        ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1AdmPostController.class))
+                .andExpect(handler().methodName("count"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.all").value(postService.count()));
+
+    }
+
+    @Test
+    @DisplayName("관리자용 게시글 수 통계, 403 권한 없음")
+    void t2() throws Exception {
+        Member admin = memberService.findByUsername("user1").get();
+        String authorApiKey = admin.getApiKey();
+        String accessToken = memberService.genAccessToken(admin);
+
+        ResultActions resultActions = mvc.perform(
+                get("/api/v1/adm/posts/count")
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
+        ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1AdmPostController.class))
+                .andExpect(handler().methodName("count"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.message").value("""
+                        권한이 없습니다.
+                        """.stripIndent().trim()));
+
+    }
+}

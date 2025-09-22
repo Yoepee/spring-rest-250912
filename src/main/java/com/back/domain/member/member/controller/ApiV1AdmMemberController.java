@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/adm/members")
 @RequiredArgsConstructor
-@Tag(name="ApiV1MemberController", description = "관리자용 API 맴버 컨트롤러")
+@Tag(name="ApiV1AdmMemberController", description = "API 맴버 컨트롤러 - 관리자")
 @SecurityRequirement(name="bearerAuth")
 public class ApiV1AdmMemberController {
     private final MemberService memberService;
