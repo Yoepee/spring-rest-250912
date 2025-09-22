@@ -1,0 +1,59 @@
+package com.back.domain.member.member.controller;
+
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@ActiveProfiles("test")
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+public class ApiV1AdmMemberControllerTest {
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private MemberService memberService;
+
+    @Test
+    @DisplayName("관리자용 맴버 리스트 조회")
+    void t1() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                get("/api/v1/adm/members")
+        ).andDo(print());
+
+        List<Member> members = memberService.findAll();
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1AdmMemberController.class))
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(members.size()));
+
+        for (int i = 0; i < members.size(); i++) {
+            Member member = members.get(i);
+
+            resultActions
+                    .andExpect(jsonPath("$[%d].id".formatted(i)).value(member.getId()))
+                    .andExpect(jsonPath("$[%d].createdDate".formatted(i)).value(Matchers.startsWith(member.getCreatedDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].modifiedDate".formatted(i)).value(Matchers.startsWith(member.getModifiedDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].nickname".formatted(i)).value(member.getNickname()))
+                    .andExpect(jsonPath("$[%d].username".formatted(i)).value(member.getUsername()));
+        }
+    }
+}

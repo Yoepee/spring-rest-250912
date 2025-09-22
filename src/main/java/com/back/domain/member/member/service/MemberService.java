@@ -6,6 +6,7 @@ import com.back.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,5 +47,9 @@ public class MemberService {
     }
     public Map<String, Object> payload(String accessToken) {
         return authTokenService.payload(accessToken);
+    }
+
+    public List<Member> findAll() {
+        return memberRepository.findAll();
     }
 }
