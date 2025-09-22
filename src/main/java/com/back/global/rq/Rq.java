@@ -58,7 +58,7 @@ public class Rq {
         if (isAccessTokenExists && !isAccessTokenValid) {
             // apiKey(refreshToken)을 이용한 accessToken 재발급
             member = memberService.findByApiKey(apiKey)
-                    .orElseThrow(() -> new ServiceException("401-3", "존재하지 않는 회원입니다."));
+                    .orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
             String actorAccessToken = memberService.genAccessToken(member);
             setCookie("accessToken", actorAccessToken);
             setHeader("Authorization", "Bearer %s %s".formatted(apiKey, actorAccessToken));

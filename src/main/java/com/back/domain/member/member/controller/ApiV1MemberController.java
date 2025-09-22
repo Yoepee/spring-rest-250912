@@ -64,11 +64,12 @@ public class ApiV1MemberController {
     @GetMapping("/me")
     public RsData<MemberDto> me() {
         Member actor = rq.getActor();
+        Member member = memberService.findById(actor.getId()).get();
 
         return new RsData<>(
                 "200-1",
-                "%s님 정보입니다.".formatted(actor.getNickname()),
-                new MemberDto(actor)
+                "%s님 정보입니다.".formatted(member.getNickname()),
+                new MemberDto(member)
         );
 
     }
