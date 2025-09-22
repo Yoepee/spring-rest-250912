@@ -39,10 +39,8 @@ public class ApiV1MemberController {
     public RsData<MemberLoginResBody> login(@Valid @RequestBody MemberLoginReqBody reqBody) {
         Member member = memberService.findByUsername(reqBody.username())
                 .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
-
-        if (!member.getPassword().equals(reqBody.password())) {
-            throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
-        }
+        
+        memberService.checkPassword(member, reqBody.password());
 
         String accessToken = memberService.genAccessToken(member);
 
