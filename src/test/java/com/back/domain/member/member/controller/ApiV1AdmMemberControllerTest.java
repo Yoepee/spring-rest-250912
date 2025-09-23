@@ -33,7 +33,7 @@ public class ApiV1AdmMemberControllerTest {
     private MemberService memberService;
 
     @Test
-    @DisplayName("관리자용 맴버 리스트 조회")
+    @DisplayName("다건조회 - 관리자")
     void t1() throws Exception {
         Member admin = memberService.findByUsername("admin").get();
         String authorApiKey = admin.getApiKey();
@@ -68,7 +68,7 @@ public class ApiV1AdmMemberControllerTest {
     }
 
     @Test
-    @DisplayName("단건 조회")
+    @DisplayName("단건 조회 - 관리자")
     void t2() throws Exception {
         long id = 1;
 
@@ -97,7 +97,7 @@ public class ApiV1AdmMemberControllerTest {
     }
 
     @Test
-    @DisplayName("관리자용 맴버 리스트 조회 실패, 403")
+    @DisplayName("다건 조회 실패 - 관리자, 403")
     void t3() throws Exception {
         Member user = memberService.findByUsername("user1").get();
         String authorApiKey = user.getApiKey();
@@ -112,8 +112,31 @@ public class ApiV1AdmMemberControllerTest {
         ).andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1AdmMemberController.class))
-                .andExpect(handler().methodName("getItems"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.message").value("""
+                        권한이 없습니다.
+                        """.stripIndent().trim()));
+    }
+
+    @Test
+    @DisplayName("단건 조회 실패 - 관리자, 403")
+    void t4() throws Exception {
+        long id = 1;
+
+        Member user = memberService.findByUsername("user1").get();
+        String authorApiKey = user.getApiKey();
+        String accessToken = memberService.genAccessToken(user);
+
+        ResultActions resultActions = mvc.perform(
+                get("/api/v1/adm/members/%d".formatted(id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
+        ).andDo(print());
+
+        resultActions
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
                 .andExpect(jsonPath("$.message").value("""
