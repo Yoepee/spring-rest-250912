@@ -4,11 +4,16 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;
+import com.back.global.rsData.RsData;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,6 +30,22 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         logger.debug("CustomAuthenticationFilter: " + request.getRequestURI());
 
+        try {
+            work(request, response, filterChain);
+        } catch (ServiceException e) {
+            RsData<Void> rsData = e.getRsData();
+            response.setContentType("application/json");
+            response.setStatus(rsData.statusCode());
+            response.getWriter().write("""
+                    {
+                        "resultCode": "%s",
+                        "msg": "%s"
+                    }
+                    """.formatted(rsData.resultCode(), rsData.message()));
+        }
+    }
+
+    private void work(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // API 요청이 아니라면 패스
         if (!request.getRequestURI().startsWith("/api/")) {
             filterChain.doFilter(request, response);
@@ -90,6 +111,25 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             rq.setCookie("accessToken", actorAccessToken);
             rq.setHeader("Authorization", "Bearer %s %s".formatted(apiKey, actorAccessToken));
         }
+
+        UserDetails user = new SecurityUser(
+                member.getId(),
+                member.getUsername(),
+                "",
+                member.getNickname(),
+                List.of()
+        );
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user,
+                null,
+                user.getAuthorities()
+        );
+
+        // 이 시점 이후부터는 시큐리티가 이 요청을 인증된 사용자의 요청으로 취급
+        SecurityContextHolder
+                .getContext()
+                .setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
     }

@@ -99,9 +99,9 @@ public class ApiV1AdmMemberControllerTest {
     @Test
     @DisplayName("관리자용 맴버 리스트 조회 실패, 403")
     void t3() throws Exception {
-        Member admin = memberService.findByUsername("user1").get();
-        String authorApiKey = admin.getApiKey();
-        String accessToken = memberService.genAccessToken(admin);
+        Member user = memberService.findByUsername("user1").get();
+        String authorApiKey = user.getApiKey();
+        String accessToken = memberService.genAccessToken(user);
 
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/members")
