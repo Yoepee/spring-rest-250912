@@ -67,13 +67,13 @@ public class Post extends BaseEntity {
     }
 
     public void checkActorCanModify(Member actor) {
-        if (!(actor.getId() == this.author.getId())) {
+        if (!actor.getUsername().equals(author.getUsername())) {
             throw new ServiceException("403-1", "작성자만 게시글을 수정할 수 있습니다.");
         }
     }
 
     public void checkActorCanDelete(Member actor) {
-        if (!(actor.getId() == this.author.getId())) {
+        if (!actor.getUsername().equals(author.getUsername())) {
             throw new ServiceException("403-1", "작성자만 게시글을 삭제할 수 있습니다.");
         }
     }

@@ -24,7 +24,7 @@ public class ApiV1AdmPostController {
     private final Rq rq;
 
     @GetMapping("/count")
-    @Transactional
+    @Transactional(readOnly = true)
     @Operation(summary = "글 갯수 통계")
     public AdmPostCountResBody count() {
         Member actor = rq.getActor();
