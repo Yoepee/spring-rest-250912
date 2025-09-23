@@ -1,5 +1,8 @@
 package com.back.global.security;
 
+import com.back.global.rsData.RsData;
+import com.back.standard.util.Ut;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final CustomAuthenticationFilter customAuthenticationFilter;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,22 +52,24 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setContentType("application/json; charset=UTF-8");
                             response.setStatus(401);
-                            response.getWriter().append("""
-                                    {
-                                        "resultCode":"401-1",
-                                        "message":"로그인 후 사용해주세요."
-                                    }
-                                    """);
+                            response.getWriter().write(Ut.json.toString(
+                                            new RsData<Void>(
+                                                    "401-1",
+                                                    "로그인 후 사용해주세요."
+                                            )
+                                    )
+                            );
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setContentType("application/json; charset=UTF-8");
                             response.setStatus(403);
-                            response.getWriter().append("""
-                                    {
-                                        "resultCode":"403-1",
-                                        "message":"권한이 없습니다."
-                                    }
-                                    """);
+                            response.getWriter().write(Ut.json.toString(
+                                            new RsData<Void>(
+                                                    "403-1",
+                                                    "권한이 없습니다."
+                                            )
+                                    )
+                            );
                         })
                 );
 

@@ -164,7 +164,6 @@ public class ApiV1MemberControllerTest {
     @DisplayName("로그아웃")
     void t5() throws Exception {
         Member member = memberService.findByUsername("user1").get();
-        String authorApiKey = member.getApiKey();
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/members/logout")
@@ -220,5 +219,21 @@ public class ApiV1MemberControllerTest {
                     assertThat(headerAuthorization).isEqualTo("Bearer %s %s".formatted(actorApiKey, accessTokenCookie.getValue()));
                 }
         );
+    }
+
+    @Test
+    @DisplayName("Authorization 헤더에 잘못된 형식의 값이 들어오면 401")
+    void t7() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/members/me")
+                                .header("Authorization", "key")
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-2"))
+                .andExpect(jsonPath("$.message").value("인증 정보가 올바르지 않습니다."));
     }
 }
