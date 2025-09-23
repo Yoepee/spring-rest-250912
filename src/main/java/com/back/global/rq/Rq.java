@@ -41,9 +41,19 @@ public class Rq {
     public void setCookie(String name, String value) {
         if (value == null) value = "";
         Cookie cookie = new Cookie(name, value);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        if (value.isBlank()) cookie.setMaxAge(0);
+        cookie.setPath("/"); // 쿠키를 도메인 전체에서 쓰겠다.
+        cookie.setHttpOnly(true); // 쿠키를 스크립트로 접근 못하게 (XSS 공격 방어)
+        cookie.setDomain("localhost"); // 쿠키가 적용될 도메인 지정
+        cookie.setSecure(true); // HTTPS에서만 쿠키 전송
+        cookie.setAttribute("sameSite", "Strict"); // 크로스 사이트 요청 위조(CSRF) 공격 방어
+
+        // 값이 빈 문자열이면 쿠키 즉시 삭제
+        if (value.isBlank()) {
+            cookie.setMaxAge(0);
+        } else {
+            cookie.setMaxAge(60 * 60 * 24 * 365); // 1년
+        }
+
         resp.addCookie(cookie);
     }
 
