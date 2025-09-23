@@ -80,11 +80,14 @@ public class ApiV1PostControllerTest {
 
         Post post = postService.findById(id);
         String authorApiKey = post.getAuthor().getApiKey();
+        String accessToken = memberService.genAccessToken(post.getAuthor());
 
         ResultActions resultActions = mvc.perform(
                 put("/api/v1/posts/%d".formatted(id))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
                         .content("""
                                 {
                                   "title": "제목 update",
@@ -112,10 +115,13 @@ public class ApiV1PostControllerTest {
 
         Post post = postService.findById(id);
         String authorApiKey = post.getAuthor().getApiKey();
+        String accessToken = memberService.genAccessToken(post.getAuthor());
 
         ResultActions resultActions = mvc.perform(
                 delete("/api/v1/posts/%d".formatted(id))
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         resultActions
@@ -199,11 +205,14 @@ public class ApiV1PostControllerTest {
     void t7() throws Exception {
         Member member = memberService.findByUsername("user1").get();
         String authorApiKey = member.getApiKey();
+        String accessToken = memberService.genAccessToken(member);
 
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
                         .content("""
                                 {
                                   "title": "",
@@ -229,11 +238,14 @@ public class ApiV1PostControllerTest {
     void t8() throws Exception {
         Member member = memberService.findByUsername("user1").get();
         String authorApiKey = member.getApiKey();
+        String accessToken = memberService.genAccessToken(member);
 
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
                         .content("""
                                 {
                                   "title": "제목 new",
@@ -259,11 +271,14 @@ public class ApiV1PostControllerTest {
     void t9() throws Exception {
         Member member = memberService.findByUsername("user1").get();
         String authorApiKey = member.getApiKey();
+        String accessToken = memberService.genAccessToken(member);
 
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
                         .content("""
                                 {
                                   "title": "제목 new",
@@ -298,8 +313,6 @@ public class ApiV1PostControllerTest {
         ).andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1PostController.class))
-                .andExpect(handler().methodName("write"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-1"))
                 .andExpect(jsonPath("$.message").value("""
@@ -326,8 +339,6 @@ public class ApiV1PostControllerTest {
         ).andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1PostController.class))
-                .andExpect(handler().methodName("write"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-2"))
                 .andExpect(jsonPath("$.message").value("""
@@ -352,8 +363,6 @@ public class ApiV1PostControllerTest {
         ).andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1PostController.class))
-                .andExpect(handler().methodName("write"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-3"))
                 .andExpect(jsonPath("$.message").value("""
@@ -368,11 +377,14 @@ public class ApiV1PostControllerTest {
         long id = 1;
         Member member = memberService.findByUsername("user2").get();
         String authorApiKey = member.getApiKey();
+        String accessToken = memberService.genAccessToken(member);
 
         ResultActions resultActions = mvc.perform(
                 put("/api/v1/posts/%d".formatted(id))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
                         .content("""
                                 {
                                   "title": "제목 update",
@@ -398,10 +410,13 @@ public class ApiV1PostControllerTest {
         long id = 1;
         Member member = memberService.findByUsername("user2").get();
         String authorApiKey = member.getApiKey();
+        String accessToken = memberService.genAccessToken(member);
 
         ResultActions resultActions = mvc.perform(
                 delete("/api/v1/posts/%d".formatted(id))
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
+                        .cookie(new Cookie("apiKey", authorApiKey))
+                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         resultActions

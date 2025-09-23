@@ -20,6 +20,7 @@ public class SecurityUser extends User {
             Collection<? extends GrantedAuthority> authorities
     ) {
         super(username, password, authorities);
+        this.id = id;
         this.nickname = nickname;
     }
 }

@@ -3,6 +3,7 @@ package com.back.global.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -19,9 +20,14 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("favicon.ico").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/*/posts/{id:\\d+}",
+                                "/api/*/posts", "/api/*/posts/{postId:\\d+}/comments",
+                                "/api/*/posts/{postId:\\d+}/comments/{id:\\d+}").permitAll()
+                        .requestMatchers("/api/*/members/login", "/api/*/members/logout").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/members").permitAll()
                         .requestMatchers("/api/*/adm/**").hasRole("ADMIN")
-                        .requestMatchers("/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/*/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .headers(headers -> headers
                         .frameOptions(
@@ -37,7 +43,7 @@ public class SecurityConfig {
                             response.getWriter().append("""
                                     {
                                         "resultCode":"401-1",
-                                        "message":"로그인 후 사용하세요."
+                                        "message":"로그인 후 사용해주세요."
                                     }
                                     """);
                         })

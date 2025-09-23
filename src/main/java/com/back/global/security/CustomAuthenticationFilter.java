@@ -42,7 +42,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             response.getWriter().write("""
                     {
                         "resultCode": "%s",
-                        "msg": "%s"
+                        "message": "%s"
                     }
                     """.formatted(rsData.resultCode(), rsData.message()));
         }
@@ -106,10 +106,13 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        if (isAccessTokenExists && !isAccessTokenValid) {
-            // apiKey(refreshToken)을 이용한 accessToken 재발급
+        if (member == null) {
             member = memberService.findByApiKey(apiKey)
                     .orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
+        }
+
+        if (isAccessTokenExists && !isAccessTokenValid) {
+            // apiKey(refreshToken)을 이용한 accessToken 재발급
             String actorAccessToken = memberService.genAccessToken(member);
             rq.setCookie("accessToken", actorAccessToken);
             rq.setHeader("Authorization", "Bearer %s %s".formatted(apiKey, actorAccessToken));

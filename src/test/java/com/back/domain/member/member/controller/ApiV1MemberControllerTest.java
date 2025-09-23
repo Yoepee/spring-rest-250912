@@ -116,11 +116,12 @@ public class ApiV1MemberControllerTest {
     void t3() throws Exception {
         Member member = memberService.findByUsername("user1").get();
         String authorApiKey = member.getApiKey();
+        String accessToken = memberService.genAccessToken(member);
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/members/me")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer %s".formatted(authorApiKey))
+                                .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
                 )
                 .andDo(print());
 
@@ -142,11 +143,13 @@ public class ApiV1MemberControllerTest {
     void t4() throws Exception {
         Member member = memberService.findByUsername("user1").get();
         String authorApiKey = member.getApiKey();
+        String accessToken = memberService.genAccessToken(member);
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/members/me")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .cookie(new Cookie("apiKey", authorApiKey))
+                                .cookie(new Cookie("accessToken", accessToken))
                 )
                 .andDo(print());
 

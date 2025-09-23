@@ -67,8 +67,6 @@ public class ApiV1AdmPostControllerTest {
         ).andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1AdmPostController.class))
-                .andExpect(handler().methodName("count"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
                 .andExpect(jsonPath("$.message").value("""
