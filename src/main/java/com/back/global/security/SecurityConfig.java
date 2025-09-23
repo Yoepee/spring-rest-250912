@@ -34,7 +34,11 @@ public class SecurityConfig {
                                 HeadersConfigurer.FrameOptionsConfig::sameOrigin
                         )
                 )
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // csrf 보호기능 비활성화
+                .formLogin(AbstractHttpConfigurer::disable) // 기본 로그인 폼 비활성화
+                .logout(AbstractHttpConfigurer::disable) // 로그아웃 기능 비활성화
+                .httpBasic(AbstractHttpConfigurer::disable) // HTTP 헤더 Authorization: Basic 인증 비활성화
+                .sessionManagement(AbstractHttpConfigurer::disable) // 세션 관리 비활성화
                 .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> {
