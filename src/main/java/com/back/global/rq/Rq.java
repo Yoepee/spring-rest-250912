@@ -45,7 +45,7 @@ public class Rq {
         cookie.setHttpOnly(true); // 쿠키를 스크립트로 접근 못하게 (XSS 공격 방어)
         cookie.setDomain("localhost"); // 쿠키가 적용될 도메인 지정
         cookie.setSecure(true); // HTTPS에서만 쿠키 전송
-        cookie.setAttribute("sameSite", "Strict"); // 크로스 사이트 요청 위조(CSRF) 공격 방어
+        cookie.setAttribute("SameSite", "Strict"); // 크로스 사이트 요청 위조(CSRF) 공격 방어
 
         // 값이 빈 문자열이면 쿠키 즉시 삭제
         if (value.isBlank()) {
