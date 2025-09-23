@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -91,17 +92,13 @@ public class ApiV1PostCommentControllerTest {
 
     @Test
     @DisplayName("댓글 삭제")
+    @WithUserDetails("user1")
     void t3() throws Exception {
         long postId = 1;
         long id = 1;
 
-        Post post = postService.findById(postId);
-        PostComment postComment = postCommentService.getCommentById(post, id);
-        String authorApiKey = postComment.getAuthor().getApiKey();
-
         ResultActions resultActions = mvc.perform(
                 delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
         ).andDo(print());
 
         resultActions
@@ -114,18 +111,17 @@ public class ApiV1PostCommentControllerTest {
 
     @Test
     @DisplayName("댓글 수정")
+    @WithUserDetails("user1")
     void t4() throws Exception {
         long postId = 1;
         long id = 1;
 
         Post post = postService.findById(postId);
         PostComment postComment = postCommentService.getCommentById(post, id);
-        String authorApiKey = postComment.getAuthor().getApiKey();
 
         ResultActions resultActions = mvc.perform(
                 put("/api/v1/posts/%d/comments/%d".formatted(postId, id))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
                         .content("""
                                 {
                                   "content": "내용 update"
@@ -145,16 +141,13 @@ public class ApiV1PostCommentControllerTest {
 
     @Test
     @DisplayName("댓글 작성")
+    @WithUserDetails("user1")
     void t5() throws Exception {
         long postId = 1;
-
-        Member member = memberService.findByUsername("user1").get();
-        String authorApiKey = member.getApiKey();
 
         ResultActions resultActions = mvc.perform(
                 post("/api/v1/posts/%d/comments".formatted(postId))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
                         .content("""
                                 {
                                   "content": "내용 new"
@@ -192,8 +185,6 @@ public class ApiV1PostCommentControllerTest {
         ).andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1PostCommentController.class))
-                .andExpect(handler().methodName("write"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-1"))
                 .andExpect(jsonPath("$.message").value("""
@@ -220,8 +211,6 @@ public class ApiV1PostCommentControllerTest {
         ).andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1PostCommentController.class))
-                .andExpect(handler().methodName("write"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-2"))
                 .andExpect(jsonPath("$.message").value("""
@@ -246,8 +235,6 @@ public class ApiV1PostCommentControllerTest {
         ).andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1PostCommentController.class))
-                .andExpect(handler().methodName("write"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-3"))
                 .andExpect(jsonPath("$.message").value("""
@@ -258,17 +245,14 @@ public class ApiV1PostCommentControllerTest {
 
     @Test
     @DisplayName("댓글 수정 - 다른 계정 토큰, 403")
+    @WithUserDetails("user2")
     void t9() throws Exception {
         long postId = 1;
         long id = 1;
 
-        Member member = memberService.findByUsername("user2").get();
-        String authorApiKey = member.getApiKey();
-
         ResultActions resultActions = mvc.perform(
                 put("/api/v1/posts/%d/comments/%d".formatted(postId, id))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
                         .content("""
                                 {
                                   "content": "내용 update"
@@ -289,16 +273,13 @@ public class ApiV1PostCommentControllerTest {
 
     @Test
     @DisplayName("댓글 삭제 - 다른 계정 토큰, 403")
+    @WithUserDetails("user2")
     void t10() throws Exception {
         long postId = 1;
         long id = 1;
 
-        Member member = memberService.findByUsername("user2").get();
-        String authorApiKey = member.getApiKey();
-
         ResultActions resultActions = mvc.perform(
                 delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
-                        .header("Authorization", "Bearer %s".formatted(authorApiKey))
         ).andDo(print());
 
         resultActions

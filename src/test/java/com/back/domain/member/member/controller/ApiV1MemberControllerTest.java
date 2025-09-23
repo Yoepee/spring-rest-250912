@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -113,15 +114,12 @@ public class ApiV1MemberControllerTest {
 
     @Test
     @DisplayName("내 정보 불러오기")
+    @WithUserDetails("user1")
     void t3() throws Exception {
         Member member = memberService.findByUsername("user1").get();
-        String authorApiKey = member.getApiKey();
-        String accessToken = memberService.genAccessToken(member);
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/members/me")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
                 )
                 .andDo(print());
 
@@ -140,16 +138,12 @@ public class ApiV1MemberControllerTest {
 
     @Test
     @DisplayName("내 정보 불러오기 with Cookie")
+    @WithUserDetails("user1")
     void t4() throws Exception {
         Member member = memberService.findByUsername("user1").get();
-        String authorApiKey = member.getApiKey();
-        String accessToken = memberService.genAccessToken(member);
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/members/me")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .cookie(new Cookie("apiKey", authorApiKey))
-                                .cookie(new Cookie("accessToken", accessToken))
                 )
                 .andDo(print());
 

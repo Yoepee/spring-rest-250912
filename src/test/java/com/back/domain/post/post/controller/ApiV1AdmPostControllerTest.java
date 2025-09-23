@@ -1,14 +1,13 @@
 package com.back.domain.post.post.controller;
 
-import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.service.PostService;
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -32,16 +31,10 @@ public class ApiV1AdmPostControllerTest {
 
     @Test
     @DisplayName("관리자용 게시글 수 통계")
+    @WithUserDetails("admin")
     void t1() throws Exception {
-        Member admin = memberService.findByUsername("admin").get();
-        String authorApiKey = admin.getApiKey();
-        String accessToken = memberService.genAccessToken(admin);
-
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/posts/count")
-                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
-                        .cookie(new Cookie("apiKey", authorApiKey))
-                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         resultActions
@@ -54,16 +47,10 @@ public class ApiV1AdmPostControllerTest {
 
     @Test
     @DisplayName("관리자용 게시글 수 통계, 403 권한 없음")
+    @WithUserDetails("user1")
     void t2() throws Exception {
-        Member admin = memberService.findByUsername("user1").get();
-        String authorApiKey = admin.getApiKey();
-        String accessToken = memberService.genAccessToken(admin);
-
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/posts/count")
-                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
-                        .cookie(new Cookie("apiKey", authorApiKey))
-                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         resultActions

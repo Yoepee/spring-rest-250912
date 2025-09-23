@@ -2,14 +2,13 @@ package com.back.domain.member.member.controller;
 
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
-import jakarta.servlet.http.Cookie;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -34,17 +33,10 @@ public class ApiV1AdmMemberControllerTest {
 
     @Test
     @DisplayName("다건조회 - 관리자")
+    @WithUserDetails("admin")
     void t1() throws Exception {
-        Member admin = memberService.findByUsername("admin").get();
-        String authorApiKey = admin.getApiKey();
-        String accessToken = memberService.genAccessToken(admin);
-
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/members")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
-                        .cookie(new Cookie("apiKey", authorApiKey))
-                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         List<Member> members = memberService.findAll();
@@ -69,18 +61,12 @@ public class ApiV1AdmMemberControllerTest {
 
     @Test
     @DisplayName("단건 조회 - 관리자")
+    @WithUserDetails("admin")
     void t2() throws Exception {
         long id = 1;
 
-        Member admin = memberService.findByUsername("admin").get();
-        String authorApiKey = admin.getApiKey();
-        String accessToken = memberService.genAccessToken(admin);
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/members/%d".formatted(id))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
-                        .cookie(new Cookie("apiKey", authorApiKey))
-                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         Member member = memberService.findById(id).get();
@@ -98,17 +84,10 @@ public class ApiV1AdmMemberControllerTest {
 
     @Test
     @DisplayName("다건 조회 실패 - 관리자, 403")
+    @WithUserDetails("user1")
     void t3() throws Exception {
-        Member user = memberService.findByUsername("user1").get();
-        String authorApiKey = user.getApiKey();
-        String accessToken = memberService.genAccessToken(user);
-
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/members")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
-                        .cookie(new Cookie("apiKey", authorApiKey))
-                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         resultActions
@@ -121,19 +100,12 @@ public class ApiV1AdmMemberControllerTest {
 
     @Test
     @DisplayName("단건 조회 실패 - 관리자, 403")
+    @WithUserDetails("user1")
     void t4() throws Exception {
         long id = 1;
 
-        Member user = memberService.findByUsername("user1").get();
-        String authorApiKey = user.getApiKey();
-        String accessToken = memberService.genAccessToken(user);
-
         ResultActions resultActions = mvc.perform(
                 get("/api/v1/adm/members/%d".formatted(id))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer %s %s".formatted(authorApiKey, accessToken))
-                        .cookie(new Cookie("apiKey", authorApiKey))
-                        .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
         resultActions
